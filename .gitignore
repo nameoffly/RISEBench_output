@@ -1,0 +1,11 @@
+__pycache__/
+
+# Ignore full data_64 dataset directory.
+data_64/
+
+# Ignore all subfolders under outputs except bagel.
+outputs/
+
+outputs.zip
+
+data/
