@@ -347,6 +347,12 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--data', type=str, required=True, help='Json Path')
     parser.add_argument('--output', type=str, required=True, help='Output Image Dir, outputs/MODEL_NAME')
+    parser.add_argument(
+        '--result-dir',
+        type=str,
+        default=None,
+        help='Directory to store evaluation artifacts (.pkl/.xlsx/.csv). Defaults to --output.',
+    )
     parser.add_argument('--input', type=str, default='data', help='Input Image Dir')
     parser.add_argument('--prefix', type=str, default=None, help='output json prefix')
     parser.add_argument('--model', type=str, default=None, help='Model Name')
@@ -367,18 +373,18 @@ def main():
     args = parser.parse_args()
     configure_api(api_key_env=args.api_key_env, api_base=args.api_base)
 
-    model_name = args.output.split('/')[-1] if args.model is None else args.model
-    if not args.prefix:
-        tmp_file = f"{args.output}/{model_name}.pkl"
-        judge_res = f"{args.output}/{model_name}_judge.xlsx"
-        score_file = f"{args.output}/{model_name}_judge.csv"
-    else:
-        tmp_file = f"{args.output}/{args.prefix}_{model_name}.pkl"
-        judge_res = f"{args.output}/{args.prefix}_{model_name}_judge.xlsx"
-        score_file = f"{args.output}/{args.prefix}_{model_name}_judge.csv"
+    model_name = osp.basename(osp.normpath(args.output)) if args.model is None else args.model
+    result_dir = osp.normpath(args.result_dir) if args.result_dir else osp.normpath(args.output)
+    os.makedirs(result_dir, exist_ok=True)
 
-    if not os.path.exists('outputs'):
-        os.makedirs('outputs')
+    if not args.prefix:
+        tmp_file = osp.join(result_dir, f"{model_name}.pkl")
+        judge_res = osp.join(result_dir, f"{model_name}_judge.xlsx")
+        score_file = osp.join(result_dir, f"{model_name}_judge.csv")
+    else:
+        tmp_file = osp.join(result_dir, f"{args.prefix}_{model_name}.pkl")
+        judge_res = osp.join(result_dir, f"{args.prefix}_{model_name}_judge.xlsx")
+        score_file = osp.join(result_dir, f"{args.prefix}_{model_name}_judge.csv")
 
     data = json.load(open(args.data))
     data = pd.DataFrame(data)
