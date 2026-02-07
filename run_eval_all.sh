@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -u
+set -u -o pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT_DIR" || exit 1
@@ -36,9 +36,9 @@ for lang in "${LANGS[@]}"; do
     --data "$DATA_PATH" \
     --input "$INPUT_DIR" \
     --output "$out_dir" \
-    --result-dir "$RESULT_DIR" >"$log_file" 2>&1
+    --result-dir "$RESULT_DIR" 2>&1 | tee "$log_file"
 
-  status=$?
+  status=${PIPESTATUS[0]}
   if [[ $status -ne 0 ]]; then
     echo "失败 ${lang}（exit=${status}），详见：${log_file}"
   else
